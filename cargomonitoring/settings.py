@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cargo.apps.CargoConfig', 
 ]
 
 MIDDLEWARE = [
@@ -75,11 +76,26 @@ WSGI_APPLICATION = 'cargomonitoring.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSW'),
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
+import dj_database_url
+# db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
+""" if bool(os.environ.get('LOCAL_DEV', False)):
+    DATABASES = {'default': dj_database_url.config(default='postgres://postgres:obscured@localhost/soundfit')}
+ """
+db_from_env = dj_database_url.config('postgresql://'+ os.environ.get('DB_USER') \
+                                    + ':' + os.environ.get('DB_PASSW') \
+                                    + '@' + 'localhost' \
+                                    + '/' + os.environ.get('DB_NAME')\
+                                    , conn_max_age=600, ssl_require=True)
+DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -118,3 +134,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
