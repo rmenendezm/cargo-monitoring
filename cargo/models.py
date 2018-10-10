@@ -58,10 +58,10 @@ class Facility(models.Model):
     """
     Model representing a Facility (e.g. Bravo Supermarket Storage 23, etc.)
     """
-    name = models.CharField(max_length=200, help_text="Enter the name for the facility (e.g. main office, storage 23, etc.)")
+    name    = models.CharField(max_length=200, help_text="Enter the name for the facility (e.g. main office, storage 23, etc.)")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, help_text="Select the company this facility belongs to")
     address = AddressField()
-    phone = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
+    phone   = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
 
     def __str__(self):
         """
@@ -74,9 +74,9 @@ class Person(models.Model):
     """
     Model representing a Person (e.g. Lolo Perez, etc.)
     """
-    user = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
-    cell = PhoneNumberField(blank=True, help_text="Enter the person contact number (e.g. +19999999999, etc.)")
-    confirmed_phone = models.BooleanField(default=False)
+    user           = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
+    cell           = PhoneNumberField(blank=True, help_text="Enter the person contact number (e.g. +19999999999, etc.)")
+    cell_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         """
@@ -89,9 +89,9 @@ class Employee(models.Model):
     """
     Model representing an Employee (e.g. Lolo Perez, dispatcher at Galianos Corp.)
     """
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, help_text="Select the person this employee represents")
+    person  = models.ForeignKey(Person, on_delete=models.PROTECT, help_text="Select the person this employee represents")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, help_text="Select the company this employee works in")
-    role = models.ManyToManyField(EmployeeRole, on_delete=models.PROTECT, help_text="Select the roles this employee have in the company")
+    role    = models.ManyToManyField(EmployeeRole, on_delete=models.PROTECT, help_text="Select the roles this employee have in the company")
 
     class Meta:
         ordering = ["company","person"]
@@ -123,9 +123,9 @@ class Cargo(models.Model):
     Model representing a Cargo or Load (e.g. Shipment x from  Broker y)
     """
     description = models.CharField(max_length=200, help_text="Enter a description for the cargo")
-    price = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
-    broker = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
-    posted = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the cargo was posted" )
+    price       = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
+    broker      = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    posted      = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the cargo was posted" )
     
     CARGO_STATUS = (
         ('p', 'Posted'),
@@ -140,10 +140,10 @@ class Cargo(models.Model):
     dispatcher = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who close the deal with the broker")
     negotiated = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
     
-    driver = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
-    assigned = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
+    driver     = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
+    assigned   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
     
-    delivered = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
+    delivered  = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
 
     class Meta:
         ordering = ['-posted','description']
@@ -161,6 +161,21 @@ class Cargo(models.Model):
         return '{0} - {1} - {2} - {3}'.format(self.posted, self.description, self.price, self.broker.company.name) 
     
 
+class PickupOrder(models.Model):
+    """
+    Model representing a Pickup Order (e.g. Pickup Order w for Shipment x)
+    """
+    cargo       = models.ForeignKey(Cargo, on_delete=models.PROTECT, help_text="Represents the load or cargo to which the pick order belongs to")
+    pickup_from = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is collected")
+    deliver_to  = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is delivered")
+
+    bol_image   = models.ImageField(upload_to=)
+    pod_image   = models.ImageField(upload_to=)
+
+    loaded      = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was loaded" )
+    delivered   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
+    
+
 class Lumper(models.Model):
 
 
@@ -173,5 +188,5 @@ class Check(models.Model):
 
 
 
-class PickupOrder(models.Model):
+
 
