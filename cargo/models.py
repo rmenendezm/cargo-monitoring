@@ -1,9 +1,11 @@
 from django.db import models
+from django.urls import reverse #Used to generate urls by reversing the URL patterns
+from address.models import AddressField
+from django.contrib.auth.models import User
+from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
 
-from django.urls import reverse #Used to generate urls by reversing the URL patterns
-from address.models import AddressField
 
 class EmployeeRole(models.Model):
     """
@@ -58,8 +60,7 @@ class Facility(models.Model):
     name = models.CharField(max_length=200, help_text="Enter the name for the facility (e.g. main office, storage 23, etc.)")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, help_text="Select the company this facility belongs to")
     address = AddressField()
-
-    # to do
+    phone = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
 
     def __str__(self):
         """
@@ -69,10 +70,33 @@ class Facility(models.Model):
 
 
 class Person(models.Model):
+    """
+    Model representing a Person (e.g. Lolo Perez, etc.)
+    """
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+    cell = PhoneNumberField(blank=True, help_text="Enter the person contact number (e.g. +19999999999, etc.)")
+    confirmed_phone = models.BooleanField(default=False)
+
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site etc.)
+        """
+        return self.user.get_full_name()
 
 
 class Employee(models.Model):
-
+    """
+    Model representing an Employee (e.g. Lolo Perez, dispatcher at Galianos Corp.)
+    """
+    person = models.OneToOneField(Person, on_delete=models.PROTECT)
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, help_text="Select the company this employee works in")
+    role = models.ForeignKey(EmployeeRole, on_delete=models.PROTECT, help_text="Select the role this employee have in the company"
+    
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site etc.)
+        """
+        return self.user.get_full_name()
 
 class Lumper(models.Model):
 

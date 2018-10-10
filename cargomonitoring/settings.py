@@ -23,8 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','#beez4e^8(d_+%sz&#26+9!q*@cyjmmua+mwh=3!pov==1c$-q')
 
+GOOGLE_API_KEY = os.environ.get('CARGOMONITORING_GOOGLE_API_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
 
 ALLOWED_HOSTS = []
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'address',
+    'phonenumber_field',
     'cargo.apps.CargoConfig', 
 ]
 
