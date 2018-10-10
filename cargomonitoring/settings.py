@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'address',
+    'djmoney',
     'phonenumber_field',
     'cargo.apps.CargoConfig', 
 ]
