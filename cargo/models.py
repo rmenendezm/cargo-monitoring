@@ -63,6 +63,12 @@ class Facility(models.Model):
     address = AddressField()
     phone   = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
 
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular facility
+        """
+        return reverse('facility-detail', args=[str(self.id)])
+
     def __str__(self):
         """
         String for representing the Model object (in Admin site etc.)
@@ -77,6 +83,12 @@ class Person(models.Model):
     user           = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
     cell           = PhoneNumberField(blank=True, help_text="Enter the person contact number (e.g. +19999999999, etc.)")
     cell_confirmed = models.BooleanField(default=False)
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular person
+        """
+        return reverse('person-detail', args=[str(self.id)])
 
     def __str__(self):
         """
@@ -169,20 +181,59 @@ class PickupOrder(models.Model):
     pickup_from = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is collected")
     deliver_to  = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is delivered")
 
-    bol_image   = models.ImageField(upload_to=)
-    pod_image   = models.ImageField(upload_to=)
+    bol_image   = models.ImageField(upload_to='bol_images', blank=True)
+    pod_image   = models.ImageField(upload_to='pod_images', blank=True)
 
     loaded      = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was loaded" )
     delivered   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
+
+    class Meta:
+        ordering = ['-cargo']
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular cargo instance.
+        """
+        return reverse('pickup-detail', args=[str(self.id)])
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return '{0}-{1} {2}'.format(self.cargo.id, self.id, self.pickup_from.name) 
     
 
 class Lumper(models.Model):
+    """
+    Model representing a lumper for a specific pickup (e.g. Lumper z for Pickup Order w)
+    """
+    pickup_order = models.ForeignKey(PickupOrder, on_delete=models.PROTECT, help_text="Represents the pickup order to which the lumper was done")
+    image        = models.ImageField(upload_to='lumper_images', blank=True)
+    price        = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
+    requested    = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the lumper was requested" )
+
+    paid      = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the lumper was payed (e.g. Electronic check received" ) |
+    
+    class Meta:
+        ordering = ['-requested']
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular cargo instance.
+        """
+        return reverse('lumper-detail', args=[str(self.id)])
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return '{0}-{1}-{2} {3}'.format(self.pickup_order.cargo.id, self.pickup_order.id, self.id, self.price) 
 
 
-class Advancement(models.Model):
+# class Advancement(models.Model):
 
 
-class Check(models.Model):
+# class Check(models.Model):
 
 
 
