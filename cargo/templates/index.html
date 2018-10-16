@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+
+{% block title %}
+  <title>Cargo Monitoring</title>
+{% endblock %}
+
+{% block content %}
+  <h1>Cargo Monitoring Home</h1>
+  <p>Welcome to CargoMonitoring, a website developed by <em>All Monitoring Corp.</em>!</p>
+  <h2>Dynamic content</h2>
+  <p>The system has the following record counts:</p>
+  <ul>
+    <li><strong>Cargos:</strong> {{ num_cargos }}</li>
+    <li><strong>Pickup orders:</strong> {{ num_pickuporders }}</li>
+    <li><strong>Available cargos:</strong> {{ num_cargos_available }}</li>
+    <li><strong>Brokerages:</strong> {{ num_brokerages }}</li>
+    <li><strong>Carriers:</strong> {{ num_carriers }}</li>
+  </ul>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.db import models
 from django.urls import reverse #Used to generate urls by reversing the URL patterns
-from address.models import AddressField
+#from address.models import AddressField
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
@@ -60,7 +60,7 @@ class Facility(models.Model):
     """
     name    = models.CharField(max_length=200, help_text="Enter the name for the facility (e.g. main office, storage 23, etc.)")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, help_text="Select the company this facility belongs to")
-    address = AddressField()
+    address = models.CharField(max_length=200, help_text="Enter the address of the facility")
     phone   = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
 
     def get_absolute_url(self):
@@ -94,7 +94,7 @@ class Person(models.Model):
         """
         String for representing the Model object (in Admin site etc.)
         """
-        return self.user.get_full_name()
+        return f'({self.user.username}) - {self.user.get_full_name()}'
 
 
 class Employee(models.Model):
@@ -103,7 +103,7 @@ class Employee(models.Model):
     """
     person  = models.ForeignKey(Person, on_delete=models.PROTECT, help_text="Select the person this employee represents")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, help_text="Select the company this employee works in")
-    role    = models.ManyToManyField(EmployeeRole, on_delete=models.PROTECT, help_text="Select the roles this employee have in the company")
+    role    = models.ManyToManyField(EmployeeRole, help_text="Select the roles this employee have in the company")
 
     class Meta:
         ordering = ["company","person"]
@@ -136,7 +136,7 @@ class Cargo(models.Model):
     """
     description = models.CharField(max_length=200, help_text="Enter a description for the cargo")
     price       = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
-    broker      = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    broker      = models.ForeignKey(Employee, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
     posted      = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the cargo was posted" )
     
     CARGO_STATUS = (
@@ -147,12 +147,12 @@ class Cargo(models.Model):
         ('d', 'Delivered'),
     )
 
-    status= models.CharField(max_length=1, choices=CARGO_STATUS, default='p', help_text='Cargo status')
+    status     = models.CharField(max_length=1, choices=CARGO_STATUS, default='p', help_text='Cargo status')
 
-    dispatcher = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who close the deal with the broker")
+    dispatcher = models.ForeignKey(Employee, related_name='dispatcher', on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who close the deal with the broker")
     negotiated = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
     
-    driver     = models.ForeignKey(Employee, on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
+    driver     = models.ForeignKey(Employee, related_name='driver', on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
     assigned   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
     
     delivered  = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
@@ -178,8 +178,8 @@ class PickupOrder(models.Model):
     Model representing a Pickup Order (e.g. Pickup Order w for Shipment x)
     """
     cargo       = models.ForeignKey(Cargo, on_delete=models.PROTECT, help_text="Represents the load or cargo to which the pick order belongs to")
-    pickup_from = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is collected")
-    deliver_to  = models.ForeignKey(Facility, on_delete=models.PROTECT, help_text="Represents the facility where the cargo is delivered")
+    pickup_from = models.ForeignKey(Facility, related_name='pickup_from', on_delete=models.PROTECT, help_text="Represents the facility where the cargo is collected")
+    deliver_to  = models.ForeignKey(Facility, related_name='deliver_to', on_delete=models.PROTECT, help_text="Represents the facility where the cargo is delivered")
 
     bol_image   = models.ImageField(upload_to='bol_images', blank=True)
     pod_image   = models.ImageField(upload_to='pod_images', blank=True)
@@ -192,7 +192,7 @@ class PickupOrder(models.Model):
 
     def get_absolute_url(self):
         """
-        Returns the url to access a particular cargo instance.
+        Returns the url to access a particular capickup order.
         """
         return reverse('pickup-detail', args=[str(self.id)])
 
@@ -212,14 +212,14 @@ class Lumper(models.Model):
     price        = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
     requested    = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the lumper was requested" )
 
-    paid      = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the lumper was payed (e.g. Electronic check received" ) |
-    
+    paid      = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the lumper was payed (e.g. Electronic check received" )
+        
     class Meta:
         ordering = ['-requested']
 
     def get_absolute_url(self):
         """
-        Returns the url to access a particular cargo instance.
+        Returns the url to access a particular lumper for a pickup order.
         """
         return reverse('lumper-detail', args=[str(self.id)])
 
