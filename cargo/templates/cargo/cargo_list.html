@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Cargo List</h1>
+  {% if cargo_list %}
+  <ul>
+    {% for cargo in cargo_list %}
+      <li>
+        <a href="{{ cago.get_absolute_url }}">{{ cargo.description }} - {{ cargo.price}}</a> ({{book.author}})
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>There are no cargos in the system.</p>
+  {% endif %}       
+{% endblock %}

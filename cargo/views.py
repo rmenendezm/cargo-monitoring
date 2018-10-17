@@ -1,8 +1,9 @@
 from django.shortcuts import render
+from cargo.models import Cargo, PickupOrder, Company
+from django.views import generic
 
 # Create your views here.
 
-from cargo.models import Cargo, PickupOrder, Company
 
 def index(request):
     """View function for home page of site."""
@@ -31,3 +32,22 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
+
+
+class CargoListView(generic.ListView):
+    model = Cargo
+
+
+class BrokerListView(generic.ListView):
+    model = Company
+    context_object_name = 'broker_list'   # your own name for the list as a template variable
+    queryset = Company.objects.filter(type__type__iexact='brokerage')[:15] # Get 15 brokers 
+    template_name = 'brokers/broker_list.html'  # Specify your own template name/location
+
+
+class CarierListView(generic.ListView):
+    model = Company
+    context_object_name = 'carrier_list'   # your own name for the list as a template variable
+    queryset = Company.objects.filter(type__type__iexact='carrier')[:15] # Get 15 carriers
+    template_name = 'carriers/carrier_list.html'  # Specify your own template name/location
+
