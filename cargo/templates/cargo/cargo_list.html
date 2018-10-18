@@ -6,7 +6,7 @@
   <ul>
     {% for cargo in cargo_list %}
       <li>
-        <a href="{{ cago.get_absolute_url }}">{{ cargo.description }} - {{ cargo.price}}</a> ({{book.author}})
+        <a href="{{ cargo.get_absolute_url }}">{{ cargo.description }} - {{ cargo.price}}</a>
       </li>
     {% endfor %}
   </ul>

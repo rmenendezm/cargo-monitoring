@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Carriers List</h1>
+  {% if carrier_list %}
+  <ul>
+    {% for carrier in carrier_list %}
+      <li>
+        <a href="{{ carrier.get_absolute_url }}">{{ carrier.name }}</a>         
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>There are no carrier companies in the system.</p>
+  {% endif %}       
+{% endblock %}

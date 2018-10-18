@@ -36,18 +36,31 @@ def index(request):
 
 class CargoListView(generic.ListView):
     model = Cargo
+    paginate_by = 5
 
 
-class BrokerListView(generic.ListView):
+class CargoAvailableListView(CargoListView):
+    queryset = Cargo.objects.filter(status__exact='p')[:15] # Get 15 available cargos 
+    #template_name = 'cargo/cargo_available_list.html'  # Specify your own template name/location
+
+class CompanyListlView(generic.ListView):
     model = Company
+
+
+class BrokerListView(CompanyListlView):
     context_object_name = 'broker_list'   # your own name for the list as a template variable
     queryset = Company.objects.filter(type__type__iexact='brokerage')[:15] # Get 15 brokers 
-    template_name = 'brokers/broker_list.html'  # Specify your own template name/location
+    template_name = 'cargo/broker_list.html'  # Specify your own template name/location
 
 
-class CarierListView(generic.ListView):
-    model = Company
+class CarrierListView(CompanyListlView):
     context_object_name = 'carrier_list'   # your own name for the list as a template variable
     queryset = Company.objects.filter(type__type__iexact='carrier')[:15] # Get 15 carriers
-    template_name = 'carriers/carrier_list.html'  # Specify your own template name/location
+    template_name = 'cargo/carrier_list.html'  # Specify your own template name/location
 
+
+class CargoDetailView(generic.DetailView):
+    model = Cargo
+
+class CompanyDetailView(generic.DetailView):
+    model = Company

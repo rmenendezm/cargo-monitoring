@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Description: {{ cargo.description }}</h1>
+
+  <p><strong>Price:</strong> <a href="">{{ cargo.price }}</a></p> <!-- author detail link not yet defined -->
+  <p><strong>Brokerage:</strong> {{ cargo.broker.company.name }}</p>
+  <p><strong>Broker:</strong> {{ cargo.broker }}</p> 
+  <p><strong>Posted:</strong> {{ cargo.posted }}</p>  
+  <p><strong>Status:</strong> <span class="{% if cargo.status == 'p' %}text-success
+                                           {% elif copy.status == 'd' %}text-muted
+                                           {% elif copy.status == 'o' %}text-danger
+                                           {% else %}text-warning{% endif %}"> 
+                                           {{ cargo.get_status_display }}
+                              </span> 
+  </p>
+{% endblock %}

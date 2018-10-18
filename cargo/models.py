@@ -127,7 +127,7 @@ class Employee(models.Model):
         """
         String for representing the Model object (in Admin site etc.)
         """
-        return '{0} ({1})'.format(self.user.get_full_name(), self.company.name) 
+        return '{0} ({1})'.format(self.person.user.get_full_name(), self.company.name) 
 
 
 class Cargo(models.Model):
@@ -149,13 +149,13 @@ class Cargo(models.Model):
 
     status     = models.CharField(max_length=1, choices=CARGO_STATUS, default='p', help_text='Cargo status')
 
-    dispatcher = models.ForeignKey(Employee, related_name='dispatcher', on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who close the deal with the broker")
-    negotiated = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
+    dispatcher = models.ForeignKey(Employee, related_name='dispatcher', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who close the deal with the broker")
+    negotiated = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
     
-    driver     = models.ForeignKey(Employee, related_name='driver', on_delete=models.PROTECT, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
-    assigned   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
+    driver     = models.ForeignKey(Employee, related_name='driver', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
+    assigned   = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
     
-    delivered  = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
+    delivered  = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
 
     class Meta:
         ordering = ['-posted','description']

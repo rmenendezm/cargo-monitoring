@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Brokers List</h1>
+  {% if broker_list %}
+  <ul>
+    {% for broker in broker_list %}
+      <li>
+        <a href="{{ broker.get_absolute_url }}">{{ broker.name }}</a>         
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>There are no broker companies in the system.</p>
+  {% endif %}       
+{% endblock %}
