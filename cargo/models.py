@@ -40,6 +40,9 @@ class Company(models.Model):
     """
     name = models.CharField(max_length=200, unique=True, help_text="Enter the company's name (e.g. Galiano Corp, Bravo Supermarket, etc.)")
     type = models.ForeignKey(CompanyType, on_delete=models.PROTECT, help_text="Select a type for this company")
+    
+    class Meta:
+        ordering = ['type', 'name']
 
     def get_absolute_url(self):
         """
@@ -63,6 +66,10 @@ class Facility(models.Model):
     address = models.CharField(max_length=200, help_text="Enter the address of the facility")
     phone   = PhoneNumberField(blank=True, help_text="Enter the facility contact number (e.g. +19999999999, etc.)")
 
+    class Meta:
+        ordering = ['company', 'name']
+        #permissions = (("can_edit_book", "Allowed to edit"),)    
+    
     def get_absolute_url(self):
         """
         Returns the url to access a particular facility
@@ -106,7 +113,7 @@ class Employee(models.Model):
     role    = models.ManyToManyField(EmployeeRole, help_text="Select the roles this employee have in the company")
 
     class Meta:
-        ordering = ["company","person"]
+        ordering = ['company', 'person']
         #permissions = (("can_edit_book", "Allowed to edit"),)   
 
     def display_role(self):
@@ -158,7 +165,7 @@ class Cargo(models.Model):
     delivered  = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
 
     class Meta:
-        ordering = ['-posted','description']
+        ordering = ['-posted','description', '-price']
 
     def get_absolute_url(self):
         """
@@ -188,7 +195,7 @@ class PickupOrder(models.Model):
     delivered   = models.DateTimeField(blank=True, help_text="Represents a timestamp of when the cargo was delivered" )
 
     class Meta:
-        ordering = ['-cargo']
+        ordering = ['-cargo', 'pickup_from']
 
     def get_absolute_url(self):
         """

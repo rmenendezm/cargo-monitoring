@@ -21,6 +21,11 @@ def index(request):
     
     # Amount of Carriers companies (type = 'carrier')
     num_carriers = Company.objects.filter(type__type__iexact='carrier').count()
+
+    # Number of visits to this view, as counted in the session variable.
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
+
     
     context = {
         'num_cargos': num_cargos,
@@ -28,6 +33,7 @@ def index(request):
         'num_cargos_available': num_cargos_available,
         'num_brokerages': num_brokerages,
         'num_carriers': num_carriers,
+        'num_visits': num_visits,
     }
 
     # Render the HTML template index.html with the data in the context variable
@@ -38,14 +44,29 @@ class CargoListView(generic.ListView):
     model = Cargo
     paginate_by = 5
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the context
+        context = super(CargoListView, self).get_context_data(**kwargs)
+        # Create any data and add it to the context
+        context['page_title'] = 'Cargo List'
+        return context
+
 
 class CargoAvailableListView(CargoListView):
     queryset = Cargo.objects.filter(status__exact='p')[:15] # Get 15 available cargos 
     #template_name = 'cargo/cargo_available_list.html'  # Specify your own template name/location
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the context
+        context = super(CargoAvailableListView, self).get_context_data(**kwargs)
+        # Create any data and add it to the context
+        context['page_title'] = 'Available Cargo List'
+        return context
+
 
 class CompanyListlView(generic.ListView):
     model = Company
-
+    paginate_by = 5
 
 class BrokerListView(CompanyListlView):
     context_object_name = 'broker_list'   # your own name for the list as a template variable

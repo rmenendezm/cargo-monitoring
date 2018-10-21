@@ -17,4 +17,5 @@
     <li><strong>Brokerages:</strong> {{ num_brokerages }}</li>
     <li><strong>Carriers:</strong> {{ num_carriers }}</li>
   </ul>
+  <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
 {% endblock %}

@@ -148,3 +148,6 @@ MEDIA_URL = '/media/'
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = '/'
+
+# The site will update the database/send cookie on every request
+SESSION_SAVE_EVERY_REQUEST = True

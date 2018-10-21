@@ -1,7 +1,8 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Cargo List</h1>
+  <h1> {{ page_title }} </h1>
+  <!-- <h1> Cargo List </h1> -->
   {% if cargo_list %}
   <ul>
     {% for cargo in cargo_list %}
