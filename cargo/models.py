@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse #Used to generate urls by reversing the URL patterns
 #from address.models import AddressField
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 
@@ -143,7 +144,9 @@ class Cargo(models.Model):
     """
     description = models.CharField(max_length=200, help_text="Enter a description for the cargo")
     price       = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
-    broker      = models.ForeignKey(Employee, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    #broker      = models.ForeignKey(Employee, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    
+    broker      = models.ForeignKey(User, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
     posted      = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the cargo was posted" )
     
     CARGO_STATUS = (
@@ -156,10 +159,10 @@ class Cargo(models.Model):
 
     status     = models.CharField(max_length=1, choices=CARGO_STATUS, default='p', help_text='Cargo status')
 
-    dispatcher = models.ForeignKey(Employee, related_name='dispatcher', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who close the deal with the broker")
+    dispatcher = models.ForeignKey(User, related_name='dispatcher', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who close the deal with the broker")
     negotiated = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
     
-    driver     = models.ForeignKey(Employee, related_name='driver', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
+    driver     = models.ForeignKey(User, related_name='driver', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
     assigned   = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
     
     delivered  = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was delivered" )

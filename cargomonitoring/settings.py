@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     #'address',
     'djmoney',
     'phonenumber_field',
+    'django_extensions',
     'cargo.apps.CargoConfig', 
 ]
 
@@ -151,3 +152,12 @@ LOGIN_REDIRECT_URL = '/'
 
 # The site will update the database/send cookie on every request
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Use sendgrig smtp server for email handling
+SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ['SENDGRID_USERNAME']
+EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']

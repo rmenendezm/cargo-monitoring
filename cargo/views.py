@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from cargo.models import Cargo, PickupOrder, Company
 from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -85,3 +86,13 @@ class CargoDetailView(generic.DetailView):
 
 class CompanyDetailView(generic.DetailView):
     model = Company
+
+
+class CargosPostedByBrokerageListView(LoginRequiredMixin,generic.ListView):
+    """Generic class-based view listing books on loan to current user."""
+    model = Cargo
+    template_name ='cargo/cargos_posted_by_broker.html'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return Cargo.objects.filter(broker=self.request.user).filter(status__exact='p').order_by('-posted')
