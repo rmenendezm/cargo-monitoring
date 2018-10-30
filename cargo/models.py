@@ -1,27 +1,12 @@
 from django.db import models
 from django.urls import reverse #Used to generate urls by reversing the URL patterns
 #from address.models import AddressField
-from django.contrib.auth.models import User
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from phonenumber_field.modelfields import PhoneNumberField
 from djmoney.models.fields import MoneyField
 
 # Create your models here.
-
-
-class EmployeeRole(models.Model):
-    """
-    Model representing an employee role (e.g. broker, dispatcher, driver, manager,owner).
-    """
-    name = models.CharField(max_length=200, unique=True, help_text="Enter an employee role (e.g. broker, dispatcher, driver, manager, owner)")
-    
-    def __str__(self):
-        """
-        String for representing the Model object (in Admin site etc.)
-        """
-        return self.name
-        
-        
+       
 class CompanyType(models.Model):
     """
     Model representing a company's type (e.g. brokerage, carrier, sender/receiver)
@@ -84,46 +69,26 @@ class Facility(models.Model):
         return self.name
 
 
-class Person(models.Model):
-    """
-    Model representing a Person (e.g. Lolo Perez, etc.)
-    """
-    user           = models.OneToOneField(User, on_delete=models.PROTECT, null=True, blank=True)
-    cell           = PhoneNumberField(blank=True, help_text="Enter the person contact number (e.g. +19999999999, etc.)")
-    cell_confirmed = models.BooleanField(default=False)
-
-    def get_absolute_url(self):
-        """
-        Returns the url to access a particular person
-        """
-        return reverse('person-detail', args=[str(self.id)])
-
-    def __str__(self):
-        """
-        String for representing the Model object (in Admin site etc.)
-        """
-        return f'({self.user.username}) - {self.user.get_full_name()}'
-
-
 class Employee(models.Model):
     """
     Model representing an Employee (e.g. Lolo Perez, dispatcher at Galianos Corp.)
     """
-    person  = models.ForeignKey(Person, on_delete=models.PROTECT, help_text="Select the person this employee represents")
+    user    = models.OneToOneField(User, null=True, on_delete=models.PROTECT, help_text="Select the user this employee represents")
     company = models.ForeignKey(Company, on_delete=models.PROTECT, help_text="Select the company this employee works in")
-    role    = models.ManyToManyField(EmployeeRole, help_text="Select the roles this employee have in the company")
+    # role    = models.ManyToManyField(Group, help_text="Select the roles this employee have in the company")
+    phone   = PhoneNumberField(blank=True, help_text="Enter the employee contact number (e.g. +19999999999, etc.)")
 
     class Meta:
-        ordering = ['company', 'person']
-        #permissions = (("can_edit_book", "Allowed to edit"),)   
+        ordering = ['company', 'user']
+        # permissions = (("can_edit_book", "Allowed to edit"),)   
 
-    def display_role(self):
-        """
-        Creates a string for the Role. This is required to display role in Admin.
-        """
-        return ', '.join([ role.name for role in self.role.all()[:3] ])
+    # def display_role(self):
+    #     """
+    #     Creates a string for the Role. This is required to display role in Admin.
+    #     """
+    #     return ', '.join([ role.name for role in self.role.all()[:3] ])
         
-    display_role.short_description = 'Role XXXX'
+    # display_role.short_description = 'Role XXXX'
 
     def get_absolute_url(self):
         """
@@ -135,7 +100,7 @@ class Employee(models.Model):
         """
         String for representing the Model object (in Admin site etc.)
         """
-        return '{0} ({1})'.format(self.person.user.get_full_name(), self.company.name) 
+        return '{0} ({1})'.format(self.user.get_full_name(), self.company.name) 
 
 
 class Cargo(models.Model):
@@ -144,9 +109,9 @@ class Cargo(models.Model):
     """
     description = models.CharField(max_length=200, help_text="Enter a description for the cargo")
     price       = MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
-    #broker      = models.ForeignKey(Employee, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    broker      = models.ForeignKey(Employee, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
     
-    broker      = models.ForeignKey(User, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
+    #broker      = models.ForeignKey(User, related_name='broker', on_delete=models.PROTECT, help_text="Represents the employee from a brokerage company posting the cargo")
     posted      = models.DateTimeField(auto_now_add=True, blank=False, help_text="Represents a timestamp of when the cargo was posted" )
     
     CARGO_STATUS = (
@@ -159,10 +124,10 @@ class Cargo(models.Model):
 
     status     = models.CharField(max_length=1, choices=CARGO_STATUS, default='p', help_text='Cargo status')
 
-    dispatcher = models.ForeignKey(User, related_name='dispatcher', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who close the deal with the broker")
+    dispatcher = models.ForeignKey(Employee, related_name='dispatcher', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who close the deal with the broker")
     negotiated = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was negotiated with the broker" )
     
-    driver     = models.ForeignKey(User, related_name='driver', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
+    driver     = models.ForeignKey(Employee, related_name='driver', on_delete=models.PROTECT, blank=True, null=True, help_text="Represents the employee from a carrier company who was assigned for delivering the cargo")
     assigned   = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was assigned to the driver" )
     
     delivered  = models.DateTimeField(null=True, blank=True, help_text="Represents a timestamp of when the cargo was delivered" )

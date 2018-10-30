@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Employees</h1>
+    
+    {% if employee_list %}
+    <ul>
+      {% for employee in employee_list %} 
+      <li>
+        <a href="">{{employee}}</a>         
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p>There are no employees in the company.</p>
+    {% endif %}   
+    {% if perms.cargo.add_employee %}
+      <p><a href="{% url 'add-employee' %}">Add Employee</a></p>
+    {% endif %}       
+{% endblock %}

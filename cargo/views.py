@@ -1,7 +1,11 @@
-from django.shortcuts import render
-from cargo.models import Cargo, PickupOrder, Company
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib import messages
+from django.urls import reverse_lazy
+
+from cargo.models import Cargo, PickupOrder, Company, Employee
+from cargo.forms import CreateEmployeeForm
 
 # Create your views here.
 
@@ -88,11 +92,58 @@ class CompanyDetailView(generic.DetailView):
     model = Company
 
 
-class CargosPostedByBrokerageListView(LoginRequiredMixin,generic.ListView):
+# class CargosPostedByBrokerageListView(LoginRequiredMixin,generic.ListView):
+#     """Generic class-based view listing books on loan to current user."""
+#     model = Cargo
+#     template_name ='cargo/cargos_posted_by_broker.html'
+#     paginate_by = 10
+    
+#     def get_queryset(self):
+#         return Cargo.objects.filter(broker=self.request.user).filter(status__exact='p').order_by('-posted')
+
+
+class EmployeesByCompanyListView(PermissionRequiredMixin, generic.ListView):
     """Generic class-based view listing books on loan to current user."""
-    model = Cargo
-    template_name ='cargo/cargos_posted_by_broker.html'
+    model = Employee
+    template_name ='cargo/employee_list_by_company.html'
     paginate_by = 10
+    permission_required = ('cargo.view_employee')
     
     def get_queryset(self):
-        return Cargo.objects.filter(broker=self.request.user).filter(status__exact='p').order_by('-posted')
+        the_employee = Employee.objects.get(user=self.request.user)
+        the_company  = Company.objects.get(pk=the_employee.company.id)
+        return Employee.objects.filter(company=the_company)
+
+
+class CreateEmployeeView(PermissionRequiredMixin, generic.CreateView):
+    #login_url = reverse_lazy('users:login')
+    form_class          = CreateEmployeeForm
+    template_name       = 'cargo/employee_create.html'
+    permission_required = ('cargo.add_employee')
+    success_url         = reverse_lazy('employees-by-company')
+    success_message     = 'New employee has been created. The password has been emailed to the employee email address.'
+    
+    def get_form_kwargs(self):
+        kwargs = super(CreateEmployeeView, self).get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+    def form_valid(self, form):
+        cxt   = {'form': form, }
+        user  = form.save(commit=False)
+        # Cleaned(normalized) data
+        phone = form.cleaned_data['phone']
+        # password = form.cleaned_data['password']
+        # repeat_password = form.cleaned_data['repeat_password']
+        # if password != repeat_password:
+        #     messages.error(self.request, "Passwords do not Match", extra_tags='alert alert-danger')
+        #     return render(self.request, self.template_name, cxt)
+        user.set_password('w12sdQd!')
+        user.save()
+ 
+        # Create Employee model
+        manager  = Employee.objects.get(user=self.request.user)
+        the_company  = Company.objects.get(pk=manager.company.id)
+        Employee.objects.create(user=user, phone=phone, company=the_company)
+ 
+        return super(CreateEmployeeView, self).form_valid(form)
